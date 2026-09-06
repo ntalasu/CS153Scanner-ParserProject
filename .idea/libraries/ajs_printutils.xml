@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ajs.printutils">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/ajs.printutils.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

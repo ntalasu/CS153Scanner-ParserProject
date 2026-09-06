@@ -1,0 +1,15 @@
+Parse tree:
+
+                                    PROGRAM TestWhile1 
+                                            │
+                                      3: COMPOUND  
+                ┌──────────────────────────┴──────────────────────────┐
+           4: ASSIGN                                              6: LOOP  
+      ┌────────┴───────┐                          ┌──────────────────┴──────────────────┐
+ VARIABLE i   INTEGER_CONSTANT 1                TEST                              6: COMPOUND  
+                                                  │                                    │
+                                                NOT                               7: ASSIGN  
+                                                 │                        ┌───────────┴──────────┐
+                                                LE                   VARIABLE i                ADD  
+                                        ┌────────┴───────┐                             ┌────────┴───────┐
+                                   VARIABLE i   INTEGER_CONSTANT 5                VARIABLE i   INTEGER_CONSTANT 1 
