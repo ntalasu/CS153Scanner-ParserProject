@@ -30,9 +30,12 @@ public class Executor
         singletons.add(INTEGER_CONSTANT);
         singletons.add(REAL_CONSTANT);
         singletons.add(STRING_CONSTANT);
+
         
         relationals.add(EQ);
         relationals.add(LT);
+        relationals.add(LE);
+        relationals.add(GT);
     }
     
     public Executor(Symtab symtab)
@@ -50,7 +53,8 @@ public class Executor
             case ASSIGN :   
             case LOOP : 
             case WRITE :
-            case WRITELN :  return visitStatement(node);
+            case WRITELN :
+            case WHILE: return visitStatement(node);
             
             case TEST:      return visitTest(node);
             
@@ -75,10 +79,12 @@ public class Executor
             case LOOP :      return visitLoop(statementNode);
             case WRITE :     return visitWrite(statementNode);
             case WRITELN :   return visitWriteln(statementNode);
+            case WHILE:      return visitWhile(statementNode);
             
             default :        return null;
         }
     }
+
     
     private Object visitCompound(Node compoundNode)
     {
@@ -140,6 +146,13 @@ public class Executor
         return null;
     }
 
+    private Object visitWhile(Node whileNode){
+        while ((Boolean) visit(whileNode.children.get(0)))
+        {
+            visit(whileNode.children.get(1));
+        }
+        return null;
+    }
     private void printValue(ArrayList<Node> children)
     {
         long fieldWidth    = -1;
@@ -192,9 +205,13 @@ public class Executor
                 case INTEGER_CONSTANT : return visitIntegerConstant(expressionNode);
                 case REAL_CONSTANT    : return visitRealConstant(expressionNode);
                 case STRING_CONSTANT  : return visitStringConstant(expressionNode);
-                
                 default: return null;
             }
+        }
+
+        if (expressionNode.type == NOT)
+        {
+            return !((Boolean) visit(expressionNode.children.get(0)));
         }
         
         // Binary expressions.
@@ -210,7 +227,9 @@ public class Executor
             {
                 case EQ : value = value1 == value2; break;
                 case LT : value = value1 <  value2; break;
-                
+                case LE : value = value1 <= value2; break;
+                case GT : value = value1 >  value2; break;
+
                 default : break;
             }
             
