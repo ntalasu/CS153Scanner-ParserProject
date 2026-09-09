@@ -53,11 +53,35 @@ public class Executor
             case WRITELN :  return visitStatement(node);
             
             case TEST:      return visitTest(node);
-            
+            case SELECT:    return visitCase(node);
             default :       return visitExpression(node);
         }
     }
-    
+
+    private Object visitCase(Node selectNode) {
+
+        Node exprNode = selectNode.children.get(0);
+        double switchValue = (Double) visit(exprNode);
+
+        // Next nodes are all Select Branch nodes
+        for (int i = 1; i < selectNode.children.size(); i++) {
+
+            // selecting constants
+            Node branchNode = selectNode.children.get(i);
+            Node constantsNode = branchNode.children.get(0);
+            Node statementNode = branchNode.children.get(1);
+
+            for (Node constant : constantsNode.children) {
+                long constantValue = (Long) constant.value;
+                if (switchValue == (double) constantValue) {
+                    visit(statementNode);
+                    return null;
+                }
+            }
+
+        }
+        return null;
+    }
     private Object visitProgram(Node programNode)
     {
         Node compoundNode = programNode.children.get(0);
