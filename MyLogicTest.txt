@@ -1,0 +1,23 @@
+program MyLogicTest;
+
+begin
+    i := 6;
+    j := 2;
+
+    x := i div j;
+    writeln(x);
+
+    if (i > j) and (i <> j) then
+        y := 100
+    else
+        y := 200;
+
+    writeln(y);
+
+    if (i < j) or (i <> j) then
+        z := 300
+    else
+        z := 400;
+
+    writeln(z)
+end.

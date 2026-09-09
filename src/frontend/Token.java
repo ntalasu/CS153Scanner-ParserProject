@@ -15,9 +15,9 @@ public class Token
     {
         PROGRAM, BEGIN, END, REPEAT, UNTIL, WHILE, DO, WRITE, WRITELN, FOR,TO,DOWNTO,
         PERIOD, COLON, COLON_EQUALS, SEMICOLON, CASE, OF, COMMA,
-        PLUS, MINUS, STAR, SLASH, LPAREN, RPAREN,
-        EQUALS, LESS_THAN, LESS_THAN_EQUALS, GREATER_THAN,
-        IDENTIFIER, INTEGER, REAL, STRING, END_OF_FILE, ERROR, IF, THEN, ELSE
+        PLUS, MINUS, STAR, SLASH, LPAREN, RPAREN, DIV, AND, OR,
+        EQUALS, LESS_THAN, LESS_THAN_EQUALS, GREATER_THAN, GREATER_THAN_EQUALS, NOT_EQUALS,
+        IDENTIFIER, INTEGER, REAL, STRING, END_OF_FILE, ERROR, IF, THEN, ELSE, NOT
     }
     
     /**
@@ -45,6 +45,10 @@ public class Token
         reservedWords.put("DOWNTO", TokenType.DOWNTO);
         reservedWords.put("CASE", TokenType.CASE);
         reservedWords.put("OF",   TokenType.OF);
+        reservedWords.put("NOT", TokenType.NOT);
+        reservedWords.put("DIV", TokenType.DIV);
+        reservedWords.put("AND", TokenType.AND);
+        reservedWords.put("OR", TokenType.OR);
     }
     
     public TokenType type;       // what type of token
@@ -185,6 +189,11 @@ public class Token
                     token.text += nextChar;
                     token.type = TokenType.LESS_THAN_EQUALS;
                 }
+                else if (nextChar == '>')
+                {
+                    token.text += nextChar;
+                    token.type = TokenType.NOT_EQUALS;
+                }
                 else
                 {
                     token.type = TokenType.LESS_THAN;
@@ -193,7 +202,23 @@ public class Token
 
                 break;
             }
-            case '>' : token.type = TokenType.GREATER_THAN;      break;
+            case '>' :
+            {
+                char nextChar = source.nextChar();
+
+                if (nextChar == '=')
+                {
+                    token.text += nextChar;
+                    token.type = TokenType.GREATER_THAN_EQUALS;
+                }
+                else
+                {
+                    token.type = TokenType.GREATER_THAN;
+                    return token;
+                }
+
+                break;
+            }
             case '(' : token.type = TokenType.LPAREN;     break;
             case ')' : token.type = TokenType.RPAREN;     break;
 
