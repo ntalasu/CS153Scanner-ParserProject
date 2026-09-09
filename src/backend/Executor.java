@@ -72,8 +72,8 @@ public class Executor
             Node statementNode = branchNode.children.get(1);
 
             for (Node constant : constantsNode.children) {
-                long constantValue = (Long) constant.value;
-                if (switchValue == (double) constantValue) {
+                double constantValue = (Double) visit(constant);
+                if (switchValue == constantValue) {
                     visit(statementNode);
                     return null;
                 }
@@ -99,7 +99,7 @@ public class Executor
             case LOOP :      return visitLoop(statementNode);
             case WRITE :     return visitWrite(statementNode);
             case WRITELN :   return visitWriteln(statementNode);
-            
+            case SELECT:    return visitCase(statementNode);
             default :        return null;
         }
     }
@@ -220,7 +220,13 @@ public class Executor
                 default: return null;
             }
         }
-        
+
+        if (expressionNode.type == NEGATE)
+        {
+            double value1 = (Double) visit(expressionNode.children.get(0));
+            return Double.valueOf(-value1);
+        }
+
         // Binary expressions.
         double value1 = (Double) visit(expressionNode.children.get(0));
         double value2 = (Double) visit(expressionNode.children.get(1));
@@ -249,7 +255,7 @@ public class Executor
             case ADD :      value = value1 + value2; break;
             case SUBTRACT : value = value1 - value2; break;
             case MULTIPLY : value = value1 * value2; break;
-                
+
             case DIVIDE :
             {
                 if (value2 != 0.0) value = value1/value2;
