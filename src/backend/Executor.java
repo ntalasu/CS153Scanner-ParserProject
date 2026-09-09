@@ -33,6 +33,11 @@ public class Executor
         
         relationals.add(EQ);
         relationals.add(LT);
+        relationals.add(LE);
+        relationals.add(GT);
+        relationals.add(GE);
+        relationals.add(NE);
+
     }
     
     public Executor(Symtab symtab)
@@ -48,7 +53,8 @@ public class Executor
             
             case COMPOUND : 
             case ASSIGN :   
-            case LOOP : 
+            case LOOP :
+            case IF :    
             case WRITE :
             case WRITELN :  return visitStatement(node);
             
@@ -73,6 +79,7 @@ public class Executor
             case COMPOUND :  return visitCompound(statementNode);
             case ASSIGN :    return visitAssign(statementNode);
             case LOOP :      return visitLoop(statementNode);
+            case IF :        return visitIf(statementNode);
             case WRITE :     return visitWrite(statementNode);
             case WRITELN :   return visitWriteln(statementNode);
             
@@ -118,6 +125,22 @@ public class Executor
             }
         } while (!b);
         
+        return null;
+    }
+
+    private Object visitIf(Node ifNode)
+    {
+        //first child is the IF condition
+        boolean condition = (Boolean) visit(ifNode.children.get(0));
+        // second child is the THEN statement, third child is the ELSE statement
+        if (condition){
+            visit(ifNode.children.get(1));
+        }
+
+        else if (ifNode.children.size() > 2) {
+            visit(ifNode.children.get(2));
+        }
+ 
         return null;
     }
     
@@ -196,6 +219,42 @@ public class Executor
                 default: return null;
             }
         }
+
+        if (expressionNode.type == NOT)
+        {
+            boolean value = (Boolean) visit(expressionNode.children.get(0));
+            return !value;
+        }
+
+        if (expressionNode.type == NEGATE)
+        {
+            double value = (Double) visit(expressionNode.children.get(0));
+            return -value;
+        }
+
+                // Boolean AND.
+        if (expressionNode.type == AND)
+        {
+            boolean value1 = (Boolean) visit(expressionNode.children.get(0));
+
+            // Short-circuit if the first operand is false.
+            if (!value1) return false;
+
+            boolean value2 = (Boolean) visit(expressionNode.children.get(1));
+            return value2;
+        }
+
+        // Boolean OR.
+        if (expressionNode.type == OR)
+        {
+            boolean value1 = (Boolean) visit(expressionNode.children.get(0));
+
+            // Short-circuit if the first operand is true.
+            if (value1) return true;
+
+            boolean value2 = (Boolean) visit(expressionNode.children.get(1));
+            return value2;
+        }
         
         // Binary expressions.
         double value1 = (Double) visit(expressionNode.children.get(0));
@@ -210,6 +269,10 @@ public class Executor
             {
                 case EQ : value = value1 == value2; break;
                 case LT : value = value1 <  value2; break;
+                case LE : value = value1 <= value2; break;
+                case GT : value = value1 >  value2; break;
+                case GE : value = value1 >= value2; break;
+                case NE : value = value1 != value2; break;
                 
                 default : break;
             }
@@ -225,6 +288,17 @@ public class Executor
             case ADD :      value = value1 + value2; break;
             case SUBTRACT : value = value1 - value2; break;
             case MULTIPLY : value = value1 * value2; break;
+            case INTEGER_DIVIDE :
+            {
+                if (value2 != 0.0) value = (long) (value1/value2);
+                else
+                {
+                    runtimeError(expressionNode, "Division by zero");
+                    return 0.0;
+                }
+                
+                break;
+            }
                 
             case DIVIDE :
             {

@@ -107,13 +107,18 @@ public class Parser
         relationalOperators.add(EQUALS);
         relationalOperators.add(LESS_THAN);
         relationalOperators.add(LESS_THAN_EQUALS);
+        relationalOperators.add(GREATER_THAN_EQUALS);
+        relationalOperators.add(NOT_EQUALS);
         relationalOperators.add(GREATER_THAN);
 
         simpleExpressionOperators.add(PLUS);
         simpleExpressionOperators.add(MINUS);
+        simpleExpressionOperators.add(Token.TokenType.OR);
 
         termOperators.add(STAR);
         termOperators.add(SLASH);
+        termOperators.add(Token.TokenType.DIV);
+        termOperators.add(Token.TokenType.AND);
     }
 
     private Node parseStatement()
@@ -508,7 +513,7 @@ public class Parser
         Node loopNode = new Node(LOOP);
         currentToken=scanner.nextToken();
         Node testNode = new Node(TEST);
-        Node notNode = new Node(NOT);
+        Node notNode = new Node(Node.NodeType.NOT);
         notNode.adopt(parseExpression());
 
         testNode.adopt(notNode);
@@ -665,6 +670,8 @@ public class Parser
             Node opNode = tokenType == EQUALS    ? new Node(EQ)
                         : tokenType == LESS_THAN ? new Node(LT)
                         : tokenType == LESS_THAN_EQUALS  ? new Node(LE)
+                        : tokenType == GREATER_THAN_EQUALS ? new Node(GE)
+                        : tokenType == NOT_EQUALS ? new Node(NE)
                         : tokenType == GREATER_THAN      ? new Node(GT)
                         :                          null;
             
@@ -697,8 +704,20 @@ public class Parser
         // is a + or - operator.
         while (simpleExpressionOperators.contains(currentToken.type))
         {
-            Node opNode = currentToken.type == PLUS ? new Node(ADD)
-                                                    : new Node(SUBTRACT);
+            Node opNode;
+            if (currentToken.type == PLUS)
+            {
+                opNode = new Node(ADD);
+            }
+            else if (currentToken.type == MINUS)
+            {
+                opNode = new Node(SUBTRACT);
+            }
+            else
+            {
+                opNode = new Node(Node.NodeType.OR);
+            }
+            
             // Consume the operator.
             currentToken = scanner.nextToken();  
 
@@ -724,8 +743,25 @@ public class Parser
         // is a * or / operator.
         while (termOperators.contains(currentToken.type))
         {
-            Node opNode = currentToken.type == STAR ? new Node(MULTIPLY)
-                                                    : new Node(DIVIDE);
+            Node opNode;
+            if (currentToken.type == STAR)
+            {
+                opNode = new Node(MULTIPLY);
+            }
+            else if (currentToken.type == SLASH)
+            {
+                opNode = new Node(DIVIDE);
+            }
+            else if (currentToken.type == Token.TokenType.DIV)
+            {
+                opNode = new Node(INTEGER_DIVIDE);
+            }
+            else
+            {
+                opNode = new Node(Node.NodeType.AND);
+            }
+
+
             // Consume the operator.
             currentToken = scanner.nextToken();  
 
@@ -754,6 +790,15 @@ public class Parser
             negateNode.adopt(parseFactor());
             return negateNode;
         }
+
+        else if (currentToken.type == Token.TokenType.NOT)
+        {
+            Node notNode = new Node(Node.NodeType.NOT);
+            currentToken = scanner.nextToken();
+            notNode.adopt(parseFactor());
+            return notNode;
+        }
+
         else if (currentToken.type == LPAREN)
         {
             // Consume (
