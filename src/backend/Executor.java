@@ -33,6 +33,7 @@ public class Executor
         
         relationals.add(EQ);
         relationals.add(LT);
+        relationals.add(GT); //add this for "FOR"
     }
     
     public Executor(Symtab symtab)
@@ -210,6 +211,7 @@ public class Executor
             {
                 case EQ : value = value1 == value2; break;
                 case LT : value = value1 <  value2; break;
+                case GT : value = value1 > value2;  break; //add this for "FOR"
                 
                 default : break;
             }
