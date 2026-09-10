@@ -54,8 +54,11 @@ public class Executor
             case COMPOUND : 
             case ASSIGN :   
             case LOOP :
-            case IF :    
+            case IF :
             case WRITE :
+
+            case WHILE:
+            
             case WRITELN :  return visitStatement(node);
             case TEST:      return visitTest(node);
             
@@ -106,7 +109,8 @@ public class Executor
             case IF :        return visitIf(statementNode);
             case WRITE :     return visitWrite(statementNode);
             case WRITELN :   return visitWriteln(statementNode);
-            
+            case WHILE:      return visitWhile(statementNode);
+
             default :        return null;
         }
     }
@@ -164,10 +168,10 @@ public class Executor
         else if (ifNode.children.size() > 2) {
             visit(ifNode.children.get(2));
         }
- 
+
         return null;
     }
-    
+
     private Object visitTest(Node testNode)
     {
         return (Boolean) visit(testNode.children.get(0));
@@ -187,6 +191,13 @@ public class Executor
         return null;
     }
 
+    private Object visitWhile(Node whileNode){
+        while ((Boolean) visit(whileNode.children.get(0)))
+        {
+            visit(whileNode.children.get(1));
+        }
+        return null;
+    }
     private void printValue(ArrayList<Node> children)
     {
         long fieldWidth    = -1;
@@ -279,7 +290,7 @@ public class Executor
             boolean value2 = (Boolean) visit(expressionNode.children.get(1));
             return value2;
         }
-        
+
         // Binary expressions.
         double value1 = (Double) visit(expressionNode.children.get(0));
         double value2 = (Double) visit(expressionNode.children.get(1));
@@ -297,7 +308,7 @@ public class Executor
                 case GT : value = value1 >  value2; break;
                 case GE : value = value1 >= value2; break;
                 case NE : value = value1 != value2; break;
-                
+
                 default : break;
             }
             
@@ -320,10 +331,10 @@ public class Executor
                     runtimeError(expressionNode, "Division by zero");
                     return 0.0;
                 }
-                
+
                 break;
             }
-                
+
             case DIVIDE :
             {
                 if (value2 != 0.0) value = value1/value2;
